@@ -1,5 +1,9 @@
 # Tennis Shot Placement Tracking Library
 
+# Product Example
+
+![Data Generation Demo - Ahmani Guichard UCLA](./rally_demo_ahmani.gif)
+
 ## Overview
 
 Tracking tennis shots and player movements is crucial for a variety of applications. By gathering detailed shot placement data, we can develop advanced models that aid in:
