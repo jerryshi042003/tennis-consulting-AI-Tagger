@@ -6,5 +6,9 @@ pandas
 torch
 scipy
 scikit-image
-opencv_python
-opencv-python-headless
+opencv-python
+filterpy
+scikit-learn
+sympy
+seaborn
+Pillow
