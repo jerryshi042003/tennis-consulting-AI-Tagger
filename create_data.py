@@ -3,6 +3,9 @@ import pandas as pd
 from scipy import signal
 
 import os
+from pathlib import Path
+import subprocess
+import tempfile
 import cv2
 import numpy as np
 from detection import DetectionModel, center_of_box
@@ -10,8 +13,23 @@ from utils import get_dtype, get_video_properties
 
 
 def convert_avi_to_mp4(avi_file_path, output_name):
-    os.system("ffmpeg -i {input} -ac 2 -b:v 2000k -c:a aac -c:v libx264 -b:a 160k -vprofile high -bf 0 -strict experimental -f mp4 {output}".format(input = avi_file_path, output = output_name))
-    os.remove(avi_file_path)
+    source = Path(avi_file_path).absolute()
+    output = Path(output_name).absolute()
+    if output.exists() or output.is_symlink():
+        raise FileExistsError(output)
+
+    with tempfile.TemporaryDirectory(prefix='.video-conversion-', dir=output.parent) as directory:
+        temporary_output = Path(directory) / 'converted.mp4'
+        subprocess.run([
+            'ffmpeg', '-nostdin', '-n', '-i', str(source), '-ac', '2', '-b:v', '2000k',
+            '-c:a', 'aac', '-c:v', 'libx264', '-b:a', '160k', '-vprofile', 'high',
+            '-bf', '0', '-strict', 'experimental', '-f', 'mp4', str(temporary_output)
+        ], check=True)
+        if not temporary_output.is_file() or temporary_output.stat().st_size == 0:
+            raise RuntimeError('FFmpeg did not produce a nonempty MP4; original AVI retained')
+        # Publish without overwriting a target another process may have created.
+        os.link(temporary_output, output)
+        source.unlink()
 
     return True
 
