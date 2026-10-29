@@ -19,14 +19,21 @@ Install the Python dependencies with `python -m pip install -r requirements.txt`
 The scripts also require video files, model checkpoints under `saved states/`,
 and intermediate arrays under `output/`; these are not included in this repository.
 Paths in the script entry points must match those local inputs.
+The court reference is derived from its committed geometry when its generated
+PNG is absent, so constructing it does not require a separately supplied image
+or write files. A readable `court_configurations/court_reference.png` is loaded
+unchanged; an unreadable file is retained while using the generated fallback. Running `python court_reference.py` explicitly exports the reference;
+the output directory is created when exporting.
 
 The committed GIF and video show an earlier output. They do not establish that
 a fresh clone can reproduce it or that every predicted coordinate is accurate.
 This repository does not include an end-to-end evaluation or a trained model release.
 
-Run `python -m unittest discover -s tests` for heatmap boundaries and safe video
-conversion. The heatmap checks need NumPy; conversion checks use the standard
-library and substitute the encoder. Both execute the production functions
+Run `python -m unittest discover -s tests` for court-reference generation,
+heatmap boundaries and safe video conversion. The native court tests require
+OpenCV, NumPy and Matplotlib and are explicitly skipped when those are absent.
+The heatmap checks need NumPy; conversion checks use the standard library and
+substitute the encoder. The checks execute the production functions
 without loading unrelated detector models. Actual conversion requires FFmpeg
 and retains the original AVI when encoding fails or produces no nonempty file.
 Existing output files are never overwritten.
