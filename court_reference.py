@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -48,11 +50,18 @@ class CourtReference:
         self.court_total_width = self.court_width + self.right_left_border * 2
         self.court_total_height = self.court_height + self.top_bottom_border * 2
 
-        self.court = cv2.cvtColor(cv2.imread('court_configurations/court_reference.png'), cv2.COLOR_BGR2GRAY)
+        reference_path = Path('court_configurations/court_reference.png')
+        reference = cv2.imread(str(reference_path)) if reference_path.is_file() else None
+        # Loading a PNG produces a 0/255 mask; keep the same scale when no
+        # generated reference file exists in a fresh checkout.
+        if reference is None:
+            self.court = self.build_court_reference(save=False) * 255
+        else:
+            self.court = cv2.cvtColor(reference, cv2.COLOR_BGR2GRAY)
 
-    def build_court_reference(self):
+    def build_court_reference(self, save=True):
         """
-        Create court reference image using the lines positions
+        Create the 0/1 court reference from line positions; optionally export it.
         """
         court = np.zeros((self.court_height + 2 * self.top_bottom_border, self.court_width + 2 * self.right_left_border), dtype=np.uint8)
         cv2.line(court, *self.baseline_top, 1, self.line_width)
@@ -66,7 +75,9 @@ class CourtReference:
         cv2.line(court, *self.right_inner_line, 1, self.line_width)
         cv2.line(court, *self.middle_line, 1, self.line_width)
         court = cv2.dilate(court, np.ones((5, 5), dtype=np.uint8))
-        plt.imsave('court_configurations/court_reference.png', court, cmap='gray')
+        if save:
+            Path('court_configurations').mkdir(parents=True, exist_ok=True)
+            plt.imsave('court_configurations/court_reference.png', court, cmap='gray')
         self.court = court
         return court
 
@@ -87,6 +98,7 @@ class CourtReference:
         """
         Create all configurations of 4 points on court reference
         """
+        Path('court_configurations').mkdir(parents=True, exist_ok=True)
         for i, conf in self.court_conf.items():
             c = cv2.cvtColor(255 - self.court, cv2.COLOR_GRAY2BGR)
             for p in conf:
