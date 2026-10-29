@@ -24,6 +24,11 @@ The committed GIF and video show an earlier output. They do not establish that
 a fresh clone can reproduce it or that every predicted coordinate is accurate.
 This repository does not include an end-to-end evaluation or a trained model release.
 
-Run `python -m unittest discover -s tests` for the heatmap boundary checks. These
-checks need NumPy and execute the production heatmap method without loading
-the unrelated detector models.
+Run `python -m unittest discover -s tests` for heatmap boundaries and safe video
+conversion. The heatmap checks need NumPy; conversion checks use the standard
+library and substitute the encoder. Both execute the production functions
+without loading unrelated detector models. Actual conversion requires FFmpeg
+and retains the original AVI when encoding fails or produces no nonempty file.
+Existing output files are never overwritten.
+Publication requires filesystem hard-link support; otherwise conversion fails
+with the original AVI retained.
