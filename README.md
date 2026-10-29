@@ -23,3 +23,7 @@ Paths in the script entry points must match those local inputs.
 The committed GIF and video show an earlier output. They do not establish that
 a fresh clone can reproduce it or that every predicted coordinate is accurate.
 This repository does not include an end-to-end evaluation or a trained model release.
+
+Run `python -m unittest discover -s tests` for the heatmap boundary checks. These
+checks need NumPy and execute the production heatmap method without loading
+the unrelated detector models.
