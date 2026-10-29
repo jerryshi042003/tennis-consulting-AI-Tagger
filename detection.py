@@ -256,12 +256,13 @@ class DetectionModel:
         smoothed_1 = np.zeros_like(positions_1)
         smoothed_1[:, 0] = signal.savgol_filter(positions_1[:, 0], 7, 2)
         smoothed_1[:, 1] = signal.savgol_filter(positions_1[:, 1], 7, 2)
-        positions_2 = np.array(positions_2)
+        positions_2 = np.array(positions_2, dtype=float)
         smoothed_2 = np.zeros_like(positions_2)
         smoothed_2[:, 0] = signal.savgol_filter(positions_2[:, 0], 7, 2)
         smoothed_2[:, 1] = signal.savgol_filter(positions_2[:, 1], 7, 2)
 
-        smoothed_2[not mask, :] = [None, None]
+        # Filled positions only support smoothing; they are not observations.
+        smoothed_2[np.logical_not(mask), :] = np.nan
         return smoothed_1, smoothed_2
 
 
