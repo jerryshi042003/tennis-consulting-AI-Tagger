@@ -19,19 +19,19 @@ class Statistics:
     def get_player_position_heatmap(self, pit_size=80):
         """
         Calculate the heatmap of both players positions in the video
+        Clamp finite positions to the nearest grid edge; skip missing samples.
         """
         court_width = self.court_tracker.court_reference.court_total_width
         court_height = self.court_tracker.court_reference.court_total_height
         heatmap_shape = (court_height // pit_size, court_width // pit_size)
         heatmap = np.zeros(heatmap_shape)
-        for x, y in self.feet_bottom:
-            x = int(x)
-            y = int(y)
-            heatmap[min(heatmap_shape[0] - 1,y // pit_size), min(heatmap_shape[1] - 1,x // pit_size)] += 1
-        for x, y in self.feet_top:
-            x = int(x)
-            y = int(y)
-            heatmap[min(heatmap_shape[0] - 1,y // pit_size), min(heatmap_shape[1] - 1,x // pit_size)] += 1
+        for positions in (self.feet_bottom, self.feet_top):
+            for x, y in positions:
+                if not (np.isfinite(x) and np.isfinite(y)):
+                    continue
+                col = max(0, min(heatmap_shape[1] - 1, int(x) // pit_size))
+                row = max(0, min(heatmap_shape[0] - 1, int(y) // pit_size))
+                heatmap[row, col] += 1
 
         return heatmap
 
